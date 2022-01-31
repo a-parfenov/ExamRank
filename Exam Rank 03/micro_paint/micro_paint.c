@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: aleslie <aleslie@student.21-school.ru>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/01/30 21:18:41 by aleslie           #+#    #+#             */
-/*   Updated: 2022/01/30 22:00:25 by aleslie          ###   ########.fr       */
+/*   Created: 2022/01/31 22:55:00 by aleslie           #+#    #+#             */
+/*   Updated: 2022/01/31 23:20:10 by aleslie          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,13 +14,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int	ft_close(FILE *file)
+int ft_close(FILE *file)
 {
-	fclose(file);
+	fclose (file);
 	return (1);
 }
-
-int	ft_check(int i, int j, float x, float y, float w, float h)
+int ft_check(int i, int j, float x, float y, float w, float h)
 {
 	if (i < y || i > y + h || j < x || j > x + w)
 		return (0);
@@ -28,10 +27,9 @@ int	ft_check(int i, int j, float x, float y, float w, float h)
 		return (2);
 	return (1);
 }
-
 int	ft_free(char **area, int height)
 {
-	int	i;
+	int i;
 
 	i = -1;
 	while (++i < height)
@@ -46,7 +44,7 @@ int	ft_error_print(void)
 	return (1);
 }
 
-int	main(int argc, char **argv)
+int	main (int argc, char **argv)
 {
 	FILE	*file;
 	float	x, y, w, h;
@@ -55,16 +53,15 @@ int	main(int argc, char **argv)
 
 	if (argc != 2)
 		return (write(1, "Error: argument\n", 16) && 1);
-	file = fopen(argv[1], "r");
-	if (!(file))
+	if (!(file = fopen(argv[1], "r")))
 		return (ft_error_print() && 1);
 	if ((fscanf(file, "%d %d %c\n", &width, &height, &back)) != 3)
 		return (ft_error_print() && ft_close(file));
 	if (width <= 0 || width > 300 || height <= 0 || height > 300)
 		return (ft_error_print() && ft_close(file));
-	area = malloc(sizeof(char *) * height);
-	if (!(area))
+	if (!(area = malloc(sizeof(char *) * height)))
 		return (ft_close(file));
+
 	i = -1;
 	while (++i < height)
 	{
@@ -75,8 +72,8 @@ int	main(int argc, char **argv)
 		while (++j < width)
 			area[i][j] = back;
 	}
-	arg = fscanf(file, "%c %f %f %f %f %c\n", &c, &x, &y, &w, &h, &symb);
-	while (arg == 6)
+
+	while ((arg = fscanf(file, "%c %f %f %f %f %c\n", &c, &x, &y, &w, &h, &symb)) == 6)
 	{
 		if ((c != 'r' && c != 'R') || (w <= 0 || h <= 0))
 			return (ft_error_print() && ft_free(area, height) && ft_close(file));
@@ -86,14 +83,15 @@ int	main(int argc, char **argv)
 			j = -1;
 			while (++j < width)
 			{
-				if ((ft_check(i, j, x, y, w, h) == 2 && c == 'r')
-					|| (ft_check(i, j, x, y, w, h) && c == 'R'))
+				if ((ft_check(i, j, x, y, w, h) == 2 && c == 'r') || (ft_check(i, j, x, y, w, h) && c == 'R'))
 						area[i][j] = symb;
 			}
 		}
 	}
+
 	if (arg > 0 && arg != 6)
 		return (ft_error_print() && ft_free(area, height) && ft_close(file));
+
 	i = -1;
 	while (++i < height)
 	{

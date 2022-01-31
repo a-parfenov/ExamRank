@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: aleslie <aleslie@student.21-school.ru>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/01/30 20:13:06 by aleslie           #+#    #+#             */
-/*   Updated: 2022/01/30 21:53:19 by aleslie          ###   ########.fr       */
+/*   Created: 2022/01/31 23:23:02 by aleslie           #+#    #+#             */
+/*   Updated: 2022/01/31 23:29:45 by aleslie          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,7 @@
 
 int	ft_free(char **area, int height)
 {
-	int	i;
-
-	i = 0;
+	int i = 0;
 	while (i < height)
 		free(area[i++]);
 	free(area);
@@ -47,30 +45,27 @@ int	main(int argc, char **argv)
 
 	if (argc != 2)
 		return (write(1, "Error: argument\n", 16) && 1);
-	file = fopen(argv[1], "r");
-	if (!(file))
-		return (ft_error_print());
+	if (!(file = fopen(argv[1], "r")))
+		return (ft_error_print() && 1);
 	if ((fscanf(file, "%d %d %c\n", &width, &height, &back)) != 3)
 		return (ft_error_print() && ft_close(file));
 	if (width <= 0 || width > 300 || height <= 0 || height > 300)
 		return (ft_error_print() && ft_close(file));
-
 	area = malloc(sizeof(char *) * height);
 	if (!(area))
 		return (ft_close(file) && 1);
+
 	i = -1;
 	while (++i < height)
 	{
-		area[i] = malloc(sizeof(char) * width);
-		if (!(area[i]))
+		if (!(area[i] = malloc(sizeof(char) * width)))
 			return (ft_free(area, i) && ft_close(file));
-		j = 0;
-		while (j < width)
-			area[i][j++] = back;
+		j = -1;
+		while (++j < width)
+			area[i][j] = back;
 	}
 
-	arg = fscanf(file, "%c %f %f %f %c\n", &c, &x, &y, &radius, &symb);
-	while (arg == 5)
+	while ((arg = fscanf(file, "%c %f %f %f %c\n", &c, &x, &y, &radius, &symb)) == 5)
 	{
 		if ((c != 'c' && c != 'C') || radius <= 0)
 			return (ft_error_print() && ft_free(area, height) && ft_close(file));
@@ -90,13 +85,13 @@ int	main(int argc, char **argv)
 
 	if (arg > 0 && arg != 5)
 		return (ft_error_print() && ft_free(area, height) && ft_close(file));
-
+		
 	i = -1;
 	while (++i < height)
 	{
-		j = 0;
-		while (j < width)
-			write(1, &area[i][j++], 1);
+		j = -1;
+		while (++j < width)
+			write(1, &area[i][j], 1);
 		write(1, "\n", 1);
 	}
 	return (ft_free(area, height) && fclose(file) && 0);
