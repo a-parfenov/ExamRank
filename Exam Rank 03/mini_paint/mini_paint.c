@@ -1,26 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   elipse.c                                           :+:      :+:    :+:   */
+/*   mini_paint.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: aleslie <aleslie@student.21-school.ru>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/31 23:23:02 by aleslie           #+#    #+#             */
-/*   Updated: 2022/01/31 23:29:45 by aleslie          ###   ########.fr       */
+/*   Updated: 2022/02/21 17:13:00 by aleslie          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <math.h>
+#include <unistd.h>
 
-int	ft_free(char **area, int height)
+int	print_error(void)
 {
-	int i = 0;
-	while (i < height)
-		free(area[i++]);
-	free(area);
+	write(1, "Error: Operation file corrupted\n", 32);
 	return (1);
 }
 
@@ -30,69 +27,75 @@ int	ft_close(FILE *file)
 	return (1);
 }
 
-int	ft_error_print(void)
+int	ft_free(char **map, int i)
 {
-	write(1, "Error: Operation file corrupted\n", 32);
+	int	j;
+
+	j = -1;
+	while (++j < i)
+		free(map[i]);
+	free(map);
 	return (1);
 }
 
 int	main(int argc, char **argv)
 {
 	FILE	*file;
-	int		i, j, arg, width, height;
+	int		i, j, arg_in_file, widht, height;
 	float	x, y, res, radius;
-	char	**area, back, symb, c;
+	char	**map, back, symb, c;
 
 	if (argc != 2)
 		return (write(1, "Error: argument\n", 16) && 1);
 	if (!(file = fopen(argv[1], "r")))
-		return (ft_error_print() && 1);
-	if ((fscanf(file, "%d %d %c\n", &width, &height, &back)) != 3)
-		return (ft_error_print() && ft_close(file));
-	if (width <= 0 || width > 300 || height <= 0 || height > 300)
-		return (ft_error_print() && ft_close(file));
-	area = malloc(sizeof(char *) * height);
-	if (!(area))
-		return (ft_close(file) && 1);
+		return (print_error() && 1);
+	if ((fscanf(file, "%d %d %c\n", &widht, &height, &back)) != 3)
+		return (print_error() && ft_close(file));
+	if (widht <= 0 || widht > 300 || height <= 0 || height > 300)
+		return (print_error() && ft_close(file));
 
+	map = malloc(sizeof(char *) * height);
+	if (!(map))
+		return (1 && ft_close(file));
 	i = -1;
 	while (++i < height)
 	{
-		if (!(area[i] = malloc(sizeof(char) * width)))
-			return (ft_free(area, i) && ft_close(file));
+		map[i] = malloc(sizeof(char) * widht);
+		if (!(map[i]))
+			return (ft_free(map, i) && ft_close(file));
 		j = -1;
-		while (++j < width)
-			area[i][j] = back;
+		while (++j < widht)
+			map[i][j] = back;
 	}
 
-	while ((arg = fscanf(file, "%c %f %f %f %c\n", &c, &x, &y, &radius, &symb)) == 5)
+	while ((arg_in_file = fscanf(file, "%c %f %f %f %c\n", &c, &x, &y, &radius, &symb)) == 5)
 	{
 		if ((c != 'c' && c != 'C') || radius <= 0)
-			return (ft_error_print() && ft_free(area, height) && ft_close(file));
+			return (ft_free(map, height) && ft_close(file) && print_error());
 		i = -1;
 		while (++i < height)
 		{
 			j = -1;
-			while (++j < width)
+			while (++j < widht)
 			{
 				res = sqrt(powf(i - y, 2) + powf(j - x, 2));
 				if (res <= radius)
-					if ((radius - res < 1 && c == 'c') || c == 'C')
-						area[i][j] = symb;
+					if ((radius - res < 1 && c == 'c' ) || c == 'C')
+						map[i][j] = symb;
 			}
 		}
 	}
 
-	if (arg > 0 && arg != 5)
-		return (ft_error_print() && ft_free(area, height) && ft_close(file));
-		
+	if (arg_in_file > 0 && arg_in_file != 5)
+		return (ft_free(map, height) && ft_close(file) && print_error());
+	
 	i = -1;
 	while (++i < height)
 	{
 		j = -1;
-		while (++j < width)
-			write(1, &area[i][j], 1);
+		while (++j < widht)
+			write(1, &map[i][j], 1);
 		write(1, "\n", 1);
 	}
-	return (ft_free(area, height) && fclose(file) && 0);
+	return (ft_free(map, height) && ft_close(file) && 0);
 }
